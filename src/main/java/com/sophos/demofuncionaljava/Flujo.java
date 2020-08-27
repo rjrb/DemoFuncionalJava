@@ -50,85 +50,87 @@ public class Flujo {
 
 	public void ejemplos() {
 		// Palabra más larga
-		System.out.println("Palabra más larga: " +
-			List.of("uno", "dos", "tres", "cuatro", "cinco").parallelStream()
-				.max(Comparator.comparing(String::length))
-				.orElseThrow()
-		);
-		System.out.println(
-			List.of("uno", "dos", "tres", "cuatro", "cinco").parallelStream()
-				.reduce("", (s1, s2) -> s1.length() < s2.length() ? s2 : s1)
-		);
+		String palabraMasLargaMax = List.of("uno", "dos", "tres", "cuatro", "cinco").parallelStream()
+			.max(Comparator.comparing(String::length))
+			.orElseThrow()
+		;
+		System.out.println("Palabra más larga (con max): " + palabraMasLargaMax);
+		String palabraMasLargaRed = List.of("uno", "dos", "tres", "cuatro", "cinco").parallelStream()
+			.reduce("", (s1, s2) -> s1.length() < s2.length() ? s2 : s1)
+		;
+		System.out.println("Palabra más larga (con reduce): " + palabraMasLargaRed);
 
 		// Intersección de listas
 		var lista1 = List.of(9,3,1,5,8,7,2,4,6,0);
-		var lista2 = List.of(2,4,6,8);
-		System.out.println(
-			lista1.stream()
-				.filter(lista2::contains)
-				.sorted()
-				.map(String::valueOf)
-				.collect(Collectors.joining(", "))
-		);
+		var lista2 = List.of(8,6,4);
+		String interseccionListas = lista1.stream()
+			.filter(lista2::contains)
+			.sorted()
+			.map(String::valueOf)
+			.collect(Collectors.joining(", "))
+		;
+		System.out.println("Intersección de listas: " + interseccionListas);
 
 		// Distinct
-		System.out.println(
-			new Random().ints(1, 10)
-				.limit(10)
-				.distinct()
-				.sorted()
-				.boxed()
-				.collect(Collectors.toList())
-		);
+		List<Integer> distintos = new Random().ints(1, 10)
+			.limit(10)
+//			.peek(i -> System.out.print(i + " "))
+			.distinct()
+			.sorted()
+			.boxed()
+			.collect(Collectors.toList())
+		;
+		System.out.println("Elementos distintos: " + distintos);
 
 		// Frecuencia de datos
-		System.out.println(
-			new Random().ints(10000, 0, 10)
-				.boxed()
-				.collect(
-					Collectors.groupingBy(
-						Function.identity(),
-						Collectors.counting()
-					)
+		Map<Integer, Long> frecuenciaDatos = new Random().ints(10000, 0, 10)
+			.boxed()
+			.collect(
+				Collectors.groupingBy(
+					Function.identity(),
+					Collectors.counting()
 				)
-		);
+			)
+		;
+		System.out.println("Frecuencia de datos: " + frecuenciaDatos);
 
 		// Agrupar por rangos
-		System.out.println(
-			IntStream.iterate(1, i -> i < 40, i -> i + 3)
-				.boxed()
-				.collect(Collectors.groupingBy(i -> i / 10 * 10))
-		);
+		Map<Integer, List<Integer>> agruparPorRangos = IntStream.iterate(1, i -> i < 40, i -> i + 3)
+			.boxed()
+			.collect(Collectors.groupingBy(i -> i / 10 * 10))
+		;
+		System.out.println("Agrupar por rangos: " + agruparPorRangos);
 
 		// Reducción (n * (n + 1)) / 2
-		System.out.println(
-			IntStream.rangeClosed(0, 100)
-				.reduce(0, (acumulado, valor) -> acumulado + valor)
-		);
+		int sumatoria = IntStream.rangeClosed(0, 100)
+			.reduce(0, (acumulado, valor) -> acumulado + valor)
+		;
+		System.out.println("Sumatoria de 1 a N: " + sumatoria);
 
 		// Map-Reduce
-		System.out.println(
-			Stream.of(1, 2, 3)
-				.parallel()
-				.reduce(
-					10,
-					(acumulado, valor) -> acumulado * valor,
-					(combinado, valor) -> combinado + valor
-				)
-		);
-		Stream.of(1, 2, 3)
+		int mapReduceInt1 = Stream.of(1, 2, 3)
+			.parallel()
+			.reduce(
+				10,
+				(acumulado, valor) -> acumulado * valor,
+				(combinado, valor) -> combinado + valor
+			)
+		;
+		System.out.println("Map-Reduce con Reduce: " + mapReduceInt1);
+		int mapReduceInt2 = Stream.of(1, 2, 3)
 			.mapToInt(i -> i * 10)
 			.sum()
 		;
+		System.out.println("Map-Reduce simplificado: " + mapReduceInt2);
 
 		// Capitalize
 		String cualquierTexto = "uN teXto   que QUERemos CAPITALIZAR";
-		System.out.println(
-			Stream.ofNullable(cualquierTexto.strip().split("\\s+"))
-				.flatMap(Stream::of)
-				.map(word -> word.length() == 1 ? word.toUpperCase() : word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
-				.collect(Collectors.joining(" "))
-		);
+		String capitalizado = Stream.ofNullable(cualquierTexto.strip().split("\\s+"))
+			.flatMap(Stream::of)
+			.map(word -> word.length() == 1 ? word.toUpperCase() : word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
+			.collect(Collectors.joining(" "))
+		;
+		System.out.println("Capitalizar: " + capitalizado);
 	}
 
 	public void casosPracticos() {
@@ -136,7 +138,7 @@ public class Flujo {
 			new Empleado("Empleado1", "Medellín", 30, 1000),
 			new Empleado("Empleado2", "Bogotá", 23, 800),
 			new Empleado("Empleado3", "Medellín", 28, 800),
-			new Empleado("Empleado4", "Bogotá", 31, 1000),
+			new Empleado("Empleado4", "Bogotá", 31, 1200),
 			new Empleado("Empleado5", "Bogotá", 24, 900),
 			new Empleado("Empleado6", "Medellín", 28, 1000),
 			new Empleado("Empleado7", "Panamá", 45, 1200),
@@ -169,7 +171,7 @@ public class Flujo {
 			.map(Empleado::getEdad)
 			.collect(Collectors.partitioningBy(edad -> edad >= 30))
 		;
-		System.out.println(mayores30);
+		System.out.println("Particionar: " + mayores30);
 
 		// Empleados con salario superior a 1000
 		List<String> salario1000 = empleados.parallelStream()
@@ -177,13 +179,13 @@ public class Flujo {
 			.map(Empleado::getNombre)
 			.collect(Collectors.toList())
 		;
-		System.out.println(salario1000);
+		System.out.println("Salarios superiores a: " + salario1000);
 
 		// Agrupar por ciudad
 		Map<String, List<Empleado>> empleadosCiudad = empleados.stream()
 			.collect(Collectors.groupingBy(Empleado::getCiudad))
 		;
-		System.out.println(empleadosCiudad);
+		System.out.println("Empleados por ciudad: " + empleadosCiudad);
 
 		// Agrupar empleados por ciudad y mapear sólo a los nombres
 		Map<String, List<String>> empleadosCiudadNombre = empleados.parallelStream()
@@ -194,7 +196,7 @@ public class Flujo {
 				)
 			)
 		;
-		System.out.println(empleadosCiudadNombre);
+		System.out.println("Empleados por ciudad (sólo nombres): " + empleadosCiudadNombre);
 
 		// Cantidad de empleados por ciudad
 		Map<String, Long> cantidadPorCiudad = empleados.stream()
@@ -205,16 +207,16 @@ public class Flujo {
 				)
 			)
 		;
-		System.out.println(cantidadPorCiudad);
+		System.out.println("Cantidad de empleados por ciudad: " + cantidadPorCiudad);
 
 		// Salario promedio de los empleados menores de 30 años que viven en Bogotá
 		double salarioPromedioMenoresBogota = empleados.parallelStream()
 			.filter(empleado -> empleado.getEdad() < 30 && empleado.getCiudad().equals("Bogotá"))
 			.collect(Collectors.averagingInt(Empleado::getSalario))
 		;
-		System.out.println(salarioPromedioMenoresBogota);
+		System.out.println("Salario promedio de los menores de 30 en Bogotá: " + salarioPromedioMenoresBogota);
 
-		// Suma de los salarios de los empleados de Medellín
+		// Estadísticas de los salarios de los empleados de Medellín
 		Predicate<Empleado> soloMedellin = empleado -> empleado.getCiudad().equals("Medellín");
 		ToIntFunction<Empleado> getSalario = Empleado::getSalario;
 		IntSummaryStatistics statistics = empleados.parallelStream()
@@ -239,7 +241,7 @@ public class Flujo {
 				)
 			)
 		;
-		System.out.println(maximos);
+		System.out.println("Salario máximo por ciudad: " + maximos);
 
 		// Empleados con salario superior a un límite por ciudad
 		Map<String, List<String>> mejoresPagos = empleados.parallelStream()
@@ -253,29 +255,44 @@ public class Flujo {
 				)
 			)
 		;
+		System.out.println("Empleados con salario superior a 1000 por ciudad");
 		mejoresPagos.forEach((ciudad, empleadosPorCiudad) -> System.out.println(ciudad + " ::: " + empleadosPorCiudad));
 
-		// Condicionales
-		System.out.println(
-			empleados.parallelStream()
-				.anyMatch(empleado -> empleado.getSalario() > 2000)
-		);
-		System.out.println(
-			empleados.parallelStream()
-				.allMatch(empleado -> empleado.getSalario() > 2000)
-		);
+		// Algún empleado con salario superior a 2000
+		boolean algunoSuperior2000 = empleados.parallelStream()
+			.anyMatch(empleado -> empleado.getSalario() > 2000)
+		;
+		System.out.println("¿Algún empleado con salario superior a 2000? " + algunoSuperior2000);
+
+		// Cualquier empleado con salario superior a 2000
+		System.out.println("Cualquier empleado con salario superior a 2000");
 		empleados.parallelStream()
-			.filter(empleado -> empleado.getSalario() > 2000)
+			.filter(empleado -> empleado.getSalario() >= 2000)
 			.map(Empleado::getNombre)
 			.findAny()
 			.ifPresent(System.out::println)
 		;
+
+		// Primer empleado con salario igual o superior a 1000
+		System.out.println("Primer empleado con salario igual o superior a 1000");
 		empleados.parallelStream()
 			.filter(empleado -> empleado.getSalario() >= 1000)
 			.map(Empleado::getNombre)
 			.findFirst()
 			.ifPresent(System.out::println)
 		;
+
+		// Asegurar que no pase algo
+		boolean nadieSuperior3000 = empleados.parallelStream()
+			.noneMatch(empleado -> empleado.getSalario() > 3000)
+		;
+		System.out.println("Nadie gana más de 3000: " + nadieSuperior3000);
+
+		// Asegurar que pase algo
+		boolean todosSuperior1000 = empleados.parallelStream()
+			.allMatch(empleado -> empleado.getSalario() > 1000)
+		;
+		System.out.println("Todos por encima de 1000: " + todosSuperior1000);
 	}
 
 
