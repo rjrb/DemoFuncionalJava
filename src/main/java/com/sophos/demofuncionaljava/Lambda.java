@@ -92,7 +92,6 @@ public class Lambda {
 		System.out.println("Composición de funciones");
 		System.out.println(composicion.apply("Hola, soy Ricardo Ramírez"));
 		System.out.println();
-
 	}
 
 }

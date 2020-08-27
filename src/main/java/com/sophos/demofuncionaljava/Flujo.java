@@ -14,8 +14,8 @@ public class Flujo {
 	public static void main(String[] args) {
 		Flujo flujos = new Flujo();
 
-		flujos.crearStream();
-		flujos.ejemplos();
+		//flujos.crearStream();
+		//flujos.ejemplos();
 		flujos.casosPracticos();
 	}
 
@@ -55,6 +55,10 @@ public class Flujo {
 				.max(Comparator.comparing(String::length))
 				.orElseThrow()
 		);
+		System.out.println(
+			List.of("uno", "dos", "tres", "cuatro", "cinco").parallelStream()
+				.reduce("", (s1, s2) -> s1.length() < s2.length() ? s2 : s1)
+		);
 
 		// Intersección de listas
 		var lista1 = List.of(9,3,1,5,8,7,2,4,6,0);
@@ -67,7 +71,7 @@ public class Flujo {
 				.collect(Collectors.joining(", "))
 		);
 
-		// Agrupación
+		// Distinct
 		System.out.println(
 			new Random().ints(1, 10)
 				.limit(10)
@@ -112,6 +116,19 @@ public class Flujo {
 					(combinado, valor) -> combinado + valor
 				)
 		);
+		Stream.of(1, 2, 3)
+			.mapToInt(i -> i * 10)
+			.sum()
+		;
+
+		// Capitalize
+		String cualquierTexto = "uN teXto   que QUERemos CAPITALIZAR";
+		System.out.println(
+			Stream.ofNullable(cualquierTexto.strip().split("\\s+"))
+				.flatMap(Stream::of)
+				.map(word -> word.length() == 1 ? word.toUpperCase() : word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
+				.collect(Collectors.joining(" "))
+		);
 	}
 
 	public void casosPracticos() {
@@ -139,54 +156,63 @@ public class Flujo {
 		System.out.println("Salarios totales (imperativo): " + totalSalarios);
 
 		// Suma de salarios - Streams
-		System.out.println("Salarios totales (funcional): " + empleados.stream().mapToInt(Empleado::getSalario).sum());
+		int salarioTotal1 = empleados.stream().mapToInt(Empleado::getSalario).sum();
+		int salarioTotal2 = empleados.stream().collect(Collectors.summingInt(Empleado::getSalario));
+		System.out.println("Salarios totales (mapReduce): " + salarioTotal1);
+		System.out.println("Salarios totales (collect): " + salarioTotal2);
 
 		// Aplanar listas de elementos, filtrar y particionar
 		var lista1 = empleados.subList(0, 2);
 		var lista2 = empleados.subList(5, 9);
-		System.out.println(
-			Stream.of(lista1, lista2)
-				.flatMap(l -> l.stream())
-				.map(Empleado::getEdad)
-				.collect(Collectors.partitioningBy(edad -> edad >= 30))
-		);
+		Map<Boolean, List<Integer>> mayores30 = Stream.of(lista1, lista2)
+			.flatMap(l -> l.stream())
+			.map(Empleado::getEdad)
+			.collect(Collectors.partitioningBy(edad -> edad >= 30))
+		;
+		System.out.println(mayores30);
 
 		// Empleados con salario superior a 1000
-		System.out.println(
-			empleados.parallelStream()
-				.filter(empleado -> empleado.getSalario() > 1000)
-				.map(Empleado::getNombre)
-				.collect(Collectors.toList())
-		);
+		List<String> salario1000 = empleados.parallelStream()
+			.filter(empleado -> empleado.getSalario() > 1000)
+			.map(Empleado::getNombre)
+			.collect(Collectors.toList())
+		;
+		System.out.println(salario1000);
 
-		// Agrupar empleados por ciudad
-		System.out.println(
-			empleados.parallelStream()
-				.collect(
-					Collectors.groupingBy(
-						Empleado::getCiudad,
-						Collectors.mapping(Empleado::getNombre, Collectors.toList())
-					)
+		// Agrupar por ciudad
+		Map<String, List<Empleado>> empleadosCiudad = empleados.stream()
+			.collect(Collectors.groupingBy(Empleado::getCiudad))
+		;
+		System.out.println(empleadosCiudad);
+
+		// Agrupar empleados por ciudad y mapear sólo a los nombres
+		Map<String, List<String>> empleadosCiudadNombre = empleados.parallelStream()
+			.collect(
+				Collectors.groupingBy(
+					Empleado::getCiudad,
+					Collectors.mapping(Empleado::getNombre, Collectors.toList())
 				)
-		);
+			)
+		;
+		System.out.println(empleadosCiudadNombre);
 
 		// Cantidad de empleados por ciudad
-		System.out.println(
-			empleados.stream()
-				.collect(
-					Collectors.groupingBy(
-						Empleado::getCiudad,
-						Collectors.counting()
-					)
+		Map<String, Long> cantidadPorCiudad = empleados.stream()
+			.collect(
+				Collectors.groupingBy(
+					Empleado::getCiudad,
+					Collectors.counting()
 				)
-		);
+			)
+		;
+		System.out.println(cantidadPorCiudad);
 
 		// Salario promedio de los empleados menores de 30 años que viven en Bogotá
-		System.out.println(
-			empleados.parallelStream()
-				.filter(empleado -> empleado.getEdad() < 30 && empleado.getCiudad().equals("Bogotá"))
-				.collect(Collectors.averagingInt(Empleado::getSalario))
-		);
+		double salarioPromedioMenoresBogota = empleados.parallelStream()
+			.filter(empleado -> empleado.getEdad() < 30 && empleado.getCiudad().equals("Bogotá"))
+			.collect(Collectors.averagingInt(Empleado::getSalario))
+		;
+		System.out.println(salarioPromedioMenoresBogota);
 
 		// Suma de los salarios de los empleados de Medellín
 		Predicate<Empleado> soloMedellin = empleado -> empleado.getCiudad().equals("Medellín");
@@ -195,7 +221,7 @@ public class Flujo {
 			.filter(soloMedellin)
 			.mapToInt(getSalario)
 			.summaryStatistics()
-			;
+		;
 		System.out.println("Empleados en Medellín: " + statistics.getCount());
 		System.out.println("Máximo salario: " + statistics.getMax());
 		System.out.println("Mínimo salario: " + statistics.getMin());
@@ -212,8 +238,22 @@ public class Flujo {
 					TreeMap::new
 				)
 			)
-			;
+		;
 		System.out.println(maximos);
+
+		// Empleados con salario superior a un límite por ciudad
+		Map<String, List<String>> mejoresPagos = empleados.parallelStream()
+			.collect(
+				Collectors.groupingBy(
+					Empleado::getCiudad,
+					Collectors.filtering(
+						empleado -> empleado.getSalario() > 1000,
+						Collectors.mapping(Empleado::getNombre, Collectors.toList())
+					)
+				)
+			)
+		;
+		mejoresPagos.forEach((ciudad, empleadosPorCiudad) -> System.out.println(ciudad + " ::: " + empleadosPorCiudad));
 
 		// Condicionales
 		System.out.println(
@@ -251,6 +291,16 @@ public class Flujo {
 			this.ciudad = ciudad;
 			this.edad = edad;
 			this.salario = salario;
+		}
+
+		@Override
+		public String toString() {
+			return "Empleado{" +
+				"nombre='" + nombre + '\'' +
+				", ciudad='" + ciudad + '\'' +
+				", edad=" + edad +
+				", salario=" + salario +
+			'}';
 		}
 
 		public String getNombre() {
