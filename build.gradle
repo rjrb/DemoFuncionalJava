@@ -4,6 +4,9 @@ plugins {
 
 group 'com.sophos.demofuncionaljava'
 version '1.0'
+description = 'Proyecto para demostrar programación funcional en Java'
+sourceCompatibility = JavaVersion.VERSION_11
+targetCompatibility = JavaVersion.VERSION_11
 
 repositories {
     mavenCentral()
