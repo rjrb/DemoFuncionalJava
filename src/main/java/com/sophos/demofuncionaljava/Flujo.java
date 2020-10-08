@@ -14,9 +14,9 @@ public class Flujo {
 	public static void main(String[] args) {
 		Flujo flujos = new Flujo();
 
-		//flujos.crearStream();
+		flujos.crearStream();
 		flujos.ejemplos();
-		//flujos.casosPracticos();
+		flujos.casosPracticos();
 	}
 
 	public void crearStream() {
@@ -134,9 +134,6 @@ public class Flujo {
 
 		// Frecuencia de números
 		List<Integer> numeros = List.of(1,2,1,3,3,1,2,1,5,1,3);
-		IntSummaryStatistics statistics = numeros.stream().mapToInt(i -> i).summaryStatistics();
-		int min = statistics.getMin();
-		int max = statistics.getMax();
 		Map<Integer, Long> frecuencia = numeros.stream()
 			.collect(
 				Collectors.groupingBy(
@@ -145,6 +142,9 @@ public class Flujo {
 				)
 			)
 		;
+		IntSummaryStatistics statistics = numeros.stream().mapToInt(i -> i).summaryStatistics();
+		int min = statistics.getMin();
+		int max = statistics.getMax();
 		String formato = IntStream.rangeClosed(min, max)
 			.mapToObj(i -> i + ": " + "*".repeat(frecuencia.getOrDefault(i, 0L).intValue()))
 			.collect(Collectors.joining("\n"))
